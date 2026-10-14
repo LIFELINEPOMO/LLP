@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>پومولاین | LIFE LINE</title>
+<link rel="icon" type="image/webp" href="https://i.postimg.cc/kg3HykvF/LL.webp">
+<link rel="apple-touch-icon" href="https://i.postimg.cc/kg3HykvF/LL.webp">
+<script>
+(function(){
+  var t=null;
+  try{t=localStorage.getItem('pomodoro-theme');}catch(e){}
+  if(t!=='dark'&&t!=='light') t=(window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  document.documentElement.setAttribute('data-theme',t);
+})();
+</script>
+<style>
+:root{
+  --font:Vazirmatn,"Segoe UI",Tahoma,"Noto Sans Arabic",sans-serif;
+}
+/* حالت روز: نسکافه‌ای و مینیمال */
+:root,[data-theme="light"]{
+  --bg:#EFE7DD; --card:#FAF6F0; --ink:#3A2B22; --mute:#8B7767; --line:#DED0C1; --track:#E9DDCF;
+  --accent:#7A5237; --onaccent:#FAF6F0; --ok:#6E8B5B; --warn:#B5532F; --glow:transparent;
+  --page:var(--bg);
+ --bubble:rgba(122,82,55,.16); --bubble2:rgba(196,156,118,.24);
+}
+/* حالت شب: نئونیِ گنگ */
+[data-theme="dark"]{
+  --bg:#0B0A15; --card:#13122A; --ink:#D6D4EE; --mute:#807CA6; --line:#26234A; --track:#1D1B3B;
+  --accent:#5FD4E8; --onaccent:#071018; --ok:#6FE3B0; --warn:#FF6FA8; --glow:rgba(95,212,232,.35);
+  --page:radial-gradient(800px 460px at 100% -8%,rgba(255,61,203,.10),transparent 60%),radial-gradient(760px 460px at 0% 0%,rgba(95,212,232,.09),transparent 60%),#0B0A15;
+ --bubble:rgba(95,212,232,.16); --bubble2:rgba(255,61,203,.13);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);background-attachment:fixed;color:var(--ink);font-family:var(--font);line-height:1.7}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 40px}
+header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+h1{margin:0;font-size:1.5rem}
+.date{color:var(--mute);font-size:.95rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.full{grid-column:1/-1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:20px;min-width:0;box-shadow:0 0 28px -14px var(--glow)}
+h2{margin:0 0 12px;font-size:1.05rem}
+.sub{color:var(--mute);font-size:.85rem;margin:-8px 0 12px}
+button,input,select{font-family:inherit;font-size:.95rem;color:var(--ink)}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* timer */
+.tabs{display:flex;gap:4px;background:var(--track);padding:4px;border-radius:12px;margin-bottom:16px}
+.tabs button{flex:1;border:0;background:transparent;padding:7px 4px;border-radius:9px;color:var(--mute)}
+.tabs button.on{background:var(--card);color:var(--ink);font-weight:700;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.ringbox{position:relative;width:250px;max-width:100%;margin:0 auto}
+.ringbox svg{width:100%;display:block;transform:rotate(-90deg)}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.time{font-size:3.2rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.modeLabel{color:var(--mute);font-size:.9rem}
+.ctrl{display:flex;gap:10px;justify-content:center;margin:16px 0 6px}
+.primary{background:var(--accent);color:var(--onaccent);border:0;border-radius:12px;padding:10px 34px;font-weight:700;font-size:1.05rem}
+.ghost{background:transparent;border:1.5px solid var(--line);border-radius:12px;padding:10px 18px}
+.hint{color:var(--mute);font-size:.8rem;text-align:center;margin:6px 0 0}
+.subjects{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:5px 12px;border:1.5px solid var(--line);border-radius:999px;cursor:pointer;background:transparent}
+.chip.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 15%,transparent);font-weight:700}
+.dot{width:11px;height:11px;border-radius:50%;background:var(--c);flex:none}
+.chip .x{border:0;background:transparent;color:var(--mute);padding:0 2px;font-size:1.1rem;line-height:1}
+.chip .x:hover{color:var(--warn)}
+.add{display:flex;gap:8px;align-items:center}
+.add input[type=text]{flex:1;min-width:0;padding:8px 12px;border:1.5px solid var(--line);border-radius:10px;background:transparent}
+.add input[type=color]{width:38px;height:38px;border:1.5px solid var(--line);border-radius:10px;padding:2px;background:transparent;cursor:pointer}
+details{margin-top:14px;color:var(--mute);font-size:.9rem}
+summary{cursor:pointer}
+.durs{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.durs label{display:flex;flex-direction:column;gap:4px;font-size:.8rem}
+.durs input,.goalbox input{width:90px;padding:6px 10px;border:1.5px solid var(--line);border-radius:10px;background:transparent}
+
+/* today */
+.donutrow{display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center}
+.donut{width:200px;flex:none}
+.legend{flex:1;min-width:170px;display:flex;flex-direction:column;gap:6px;font-size:.92rem}
+.legend div{display:flex;align-items:center;gap:8px}
+.legend .t{margin-inline-start:auto;color:var(--mute);white-space:nowrap}
+.empty{color:var(--mute);font-size:.9rem}
+.goalbox{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+.goalrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.bar{height:12px;background:var(--track);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
+.bar i.done{background:var(--ok)}
+.goaltxt{font-size:.88rem;color:var(--mute);margin-top:6px}
+
+/* charts */
+svg.chart{display:block;width:100%;height:auto;direction:ltr}
+svg.chart text{fill:var(--mute);font-family:var(--font)}
+.scroll{overflow-x:auto}
+.scroll svg{min-width:720px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:12px 0}
+.stat{background:var(--bg);border-radius:12px;padding:8px 12px}
+.stat b{display:block;font-size:1.1rem}
+.stat span{color:var(--mute);font-size:.8rem}
+.legend.wide{flex-direction:row;flex-wrap:wrap;gap:6px 18px}
+.legend.wide div{gap:6px}
+
+/* alarm */
+.alarm{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:10;background:var(--accent);color:var(--onaccent);padding:10px 14px 10px 10px;border-radius:14px;display:flex;gap:12px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,.35);max-width:94vw}
+.alarm[hidden]{display:none}
+.alarm button{background:var(--onaccent);color:var(--accent);border:0;border-radius:10px;padding:6px 14px;font-weight:700}
+footer{margin-top:22px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;color:var(--mute);font-size:.8rem;align-items:center}
+footer button{background:transparent;border:1.5px solid var(--line);border-radius:10px;padding:5px 12px;color:var(--mute)}
+[data-theme="dark"] .ringbox svg{filter:drop-shadow(0 0 6px var(--glow))}
+[data-theme="dark"] .primary{box-shadow:0 0 16px -2px var(--glow)}
+[data-theme="dark"] h1,[data-theme="dark"] h2{text-shadow:0 0 14px var(--glow)}
+[data-theme="dark"] .bar i{box-shadow:0 0 10px var(--glow)}
+.themebtn{background:var(--card);border:1.5px solid var(--line);border-radius:999px;padding:5px 14px;color:var(--ink)}
+.headright{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.monthbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.monthbar select{padding:7px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);min-width:150px}
+.monthbar button{background:transparent;border:1.5px solid var(--line);border-radius:10px;padding:6px 12px}
+.monthbar button:disabled{opacity:.4;cursor:default}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{height:40px;width:auto;display:block}
+.bname{font-weight:800;font-size:1.25rem;color:var(--ink)}
+.wrap>.brand{margin-bottom:12px}
+.bubbles{position:fixed;inset:0;overflow:hidden;z-index:-1;pointer-events:none}
+.bubbles span{position:absolute;bottom:-220px;border-radius:50%;background:var(--bubble);filter:blur(22px);opacity:0;animation:floatUp linear infinite}
+.bubbles span:nth-child(even){background:var(--bubble2)}
+.bubbles span:nth-child(1){left:6%;width:90px;height:90px;animation-duration:26s;animation-delay:-4s}
+.bubbles span:nth-child(2){left:20%;width:160px;height:160px;animation-duration:34s;animation-delay:-18s}
+.bubbles span:nth-child(3){left:36%;width:70px;height:70px;animation-duration:22s;animation-delay:-10s}
+.bubbles span:nth-child(4){left:52%;width:130px;height:130px;animation-duration:30s;animation-delay:-2s}
+.bubbles span:nth-child(5){left:66%;width:100px;height:100px;animation-duration:28s;animation-delay:-14s}
+.bubbles span:nth-child(6){left:78%;width:180px;height:180px;animation-duration:38s;animation-delay:-22s}
+.bubbles span:nth-child(7){left:88%;width:80px;height:80px;animation-duration:24s;animation-delay:-8s}
+.bubbles span:nth-child(8){left:44%;width:110px;height:110px;animation-duration:32s;animation-delay:-26s}
+@keyframes floatUp{
+  0%{transform:translate(0,0) scale(1);opacity:0}
+  12%{opacity:1}
+  50%{transform:translate(40px,-60vh) scale(1.15)}
+  88%{opacity:1}
+  100%{transform:translate(-30px,-125vh) scale(1.3);opacity:0}
+}
+@media (prefers-reduced-motion:reduce){.bubbles{display:none}}
+.card{background:color-mix(in srgb,var(--card) 84%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.manual{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;align-items:flex-end}
+.manual label{display:flex;flex-direction:column;gap:4px;font-size:.8rem}
+.manual input,.manual select{padding:6px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.manual input{width:80px}
+.manual select{min-width:130px;max-width:100%}
+.manual .ghost{padding:7px 18px}
+.mlist{margin-top:8px;display:flex;flex-direction:column;gap:4px}
+.mrow{display:flex;align-items:center;gap:8px;font-size:.85rem}
+.mrow .t{margin-inline-start:auto;white-space:nowrap}
+.mrow button{border:0;background:transparent;color:var(--mute);font-size:1.1rem;line-height:1;padding:0 4px}
+.mrow button:hover{color:var(--warn)}
+.add input[type=number]{flex:1;min-width:0;padding:8px 12px;border:1.5px solid var(--line);border-radius:10px;background:transparent}
+.chk{display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:.82rem;line-height:1.6;cursor:pointer}
+.chk input{margin-top:5px;flex:none}
+.testline{margin-top:12px;font-size:.88rem;color:var(--mute);display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.testline b{color:var(--ink)}
+.tchip{display:inline-flex;align-items:center;gap:5px;color:var(--ink)}
+[data-tip]{cursor:pointer}
+.tt{position:fixed;z-index:60;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:.85rem;white-space:pre-line;box-shadow:0 8px 26px rgba(0,0,0,.28);pointer-events:none;max-width:min(260px,90vw)}
+.tt[hidden]{display:none}
+.links{flex-basis:100%;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:2px}
+.links .linkbtn{display:inline-block;text-decoration:none;background:transparent;border:1.5px solid var(--line);border-radius:10px;padding:6px 14px;color:var(--mute);font-family:inherit;font-size:.82rem;cursor:pointer}
+.links .linkbtn:hover{color:var(--ink);border-color:var(--mute)}
+.links .heart{color:var(--warn);border-color:var(--warn)}
+.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(14,10,24,.30);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.modal[hidden]{display:none}
+.glass{position:relative;width:min(380px,100%);padding:28px 22px 22px;border-radius:24px;text-align:center;background:color-mix(in srgb,var(--card) 60%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);border:1px solid color-mix(in srgb,var(--ink) 16%,transparent);box-shadow:0 20px 60px -20px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.4)}
+[data-theme="dark"] .glass{border-color:rgba(95,212,232,.30);box-shadow:0 0 44px -12px var(--glow),0 20px 60px -20px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.08)}
+.glass h3{margin:0 0 8px;font-size:1.15rem}
+.glass p{margin:0 0 14px;color:var(--mute);font-size:.9rem}
+.glass .gbtn{display:block;text-decoration:none;margin:10px 0 0;padding:11px 14px;border-radius:14px;background:var(--accent);color:var(--onaccent);font-weight:700;font-family:inherit;font-size:.95rem}
+[data-theme="dark"] .glass .gbtn{box-shadow:0 0 16px -2px var(--glow)}
+.glass .url{margin-top:10px;color:var(--mute);font-size:.8rem}
+.mclose{position:absolute;top:10px;inset-inline-start:12px;border:0;background:transparent;color:var(--mute);font-size:1.5rem;line-height:1;cursor:pointer;padding:2px 8px}
+.mclose:hover{color:var(--ink)}
+@media (max-width:820px){ .grid{grid-template-columns:1fr} }
+/* ===== صفحه آغازین نئونی (۳ ثانیه) ===== */
+#splash{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% 45%,#12102b,#05060f 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;cursor:pointer;animation:spOut .7s ease 3s forwards}
+#splash img{width:132px;height:132px;object-fit:contain;border-radius:50%;background:#fff;padding:4px;box-shadow:0 0 0 3px #2de2e6,0 0 28px #2de2e6,0 0 70px #7c5cff;animation:spPulse 1.6s ease-in-out infinite}
+#splash span{font:800 clamp(30px,8vw,52px) Vazirmatn,Tahoma,sans-serif;letter-spacing:.35em;padding-left:.35em;color:#fff;text-shadow:0 0 6px #fff,0 0 18px #2de2e6,0 0 38px #2de2e6,0 0 70px #7c5cff;animation:spIn 1s ease both}
+#splash small{color:#8f93b8;font:12px Vazirmatn,Tahoma,sans-serif;opacity:.8}
+@keyframes spPulse{50%{transform:scale(1.06);box-shadow:0 0 0 3px #ff4fd8,0 0 40px #ff4fd8,0 0 90px #2de2e6}}
+@keyframes spIn{from{opacity:0;transform:translateY(12px);filter:blur(6px)}}
+@keyframes spOut{to{opacity:0;visibility:hidden;pointer-events:none}}
+@media(prefers-reduced-motion:reduce){#splash img,#splash span{animation:none}}
+</style>
+</head>
+<body>
+<div id="splash" role="presentation"><img src="https://i.postimg.cc/kg3HykvF/LL.webp" alt=""><span dir="ltr">LIFE LINE</span><small>برای رد کردن کلیک کنید</small></div>
+
+<div class="bubbles" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+
+<div class="tt" id="tt" hidden></div>
+
+<div class="alarm" id="alarm" hidden>
+  <span id="alarmMsg"></span>
+  <button id="stopAlarm">قطع صدا</button>
+</div>
+
+<div class="wrap">
+  <div class="brand"><img src="https://i.postimg.cc/kg3HykvF/LL.webp" alt="لوگوی LIFE LINE" class="logo" width="40" height="40" onerror="this.style.display='none'"><span class="bname">پومولاین</span></div>
+  <header>
+    <h1>تایمر مطالعه</h1>
+    <div class="headright"><div class="date" id="today"></div><button class="themebtn" id="themeBtn" aria-label="تغییر حالت روز و شب"></button></div>
+  </header>
+
+  <div class="grid">
+
+    <!-- تایمر -->
+    <section class="card">
+      <div class="tabs" id="tabs">
+        <button data-m="focus" class="on">تمرکز</button>
+        <button data-m="short">استراحت کوتاه</button>
+        <button data-m="long">استراحت بلند</button>
+      </div>
+      <div class="ringbox">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <circle cx="100" cy="100" r="88" fill="none" stroke="var(--track)" stroke-width="10"/>
+          <circle id="ring" cx="100" cy="100" r="88" fill="none" stroke-width="10" stroke-linecap="round" stroke-dasharray="552.92" stroke-dashoffset="0"/>
+        </svg>
+        <div class="center">
+          <div class="time" id="time">۲۵:۰۰</div>
+          <div class="modeLabel" id="modeLabel">تمرکز</div>
+        </div>
+      </div>
+      <div class="ctrl">
+        <button class="primary" id="startBtn">شروع</button>
+        <button class="ghost" id="resetBtn">از نو</button>
+      </div>
+      <p class="hint">مطالعه لحظه‌به‌لحظه ذخیره می‌شود و بعد از ساعت ۱۲ تویی و آمارت.</p>
+
+      <div class="subjects">
+        <div class="chips" id="chips"></div>
+        <div class="add">
+          <input type="text" id="newName" placeholder="نام درس جدید" maxlength="30">
+          <input type="color" id="newColor" title="رنگ درس">
+          <button class="ghost" id="addBtn">افزودن</button>
+        </div>
+        <div class="add" style="margin-top:10px">
+          <input type="number" id="qtN" min="1" max="5000" inputmode="numeric" placeholder="تعداد تست حل‌شده (امروز، برای درس انتخابی)">
+          <button class="ghost" id="qtAdd">ثبت تست</button>
+        </div>
+        <div class="hint" id="qtMsg" role="status" style="text-align:start"></div>
+        <details>
+          <summary>تنظیم مدت زمان‌ها (دقیقه)</summary>
+          <div class="durs">
+            <label>تمرکز<input type="number" id="dFocus" min="1" max="180"></label>
+            <label>استراحت کوتاه<input type="number" id="dShort" min="1" max="60"></label>
+            <label>استراحت بلند<input type="number" id="dLong" min="1" max="90"></label>
+          </div>
+          <label class="chk"><input type="checkbox" id="bgOpt"> ادامه در پس‌زمینه: یک صدای بسیار آرام و نامحسوس پخش می‌شود تا مرورگر صفحه را نبندد و زنگ به‌موقع بخورد (ممکن است موسیقی دیگر را موقتاً قطع کند).</label>
+        </details>
+        <details id="manualBox">
+          <summary>ثبت دستی ساعات مطالعه و تعداد تست</summary>
+          <div class="manual">
+            <label>روز<select id="mDay"></select></label>
+            <label>درس<select id="mSubj"></select></label>
+            <label>ساعت<input type="number" id="mH" min="0" max="24" step="1" value="0"></label>
+            <label>دقیقه<input type="number" id="mM" min="0" max="59" step="1" value="0"></label>
+            <label>تعداد تست<input type="number" id="mT" min="0" max="5000" step="1" value="0"></label>
+            <button class="ghost" id="mAdd">ثبت</button>
+          </div>
+          <div class="hint" id="mMsg" role="status" style="text-align:start"></div>
+          <div class="mlist" id="mList"></div>
+        </details>
+      </div>
+    </section>
+
+    <!-- امروز -->
+    <section class="card">
+      <h2>مطالعه امروز</h2>
+      <div class="donutrow">
+        <svg class="donut chart" id="donut" viewBox="0 0 200 200" role="img" aria-label="نمودار دونات مطالعه امروز"></svg>
+        <div class="legend" id="todayLegend"></div>
+      </div>
+      <div class="testline" id="todayTests"></div>
+      <div class="goalbox">
+        <div class="goalrow">
+          <label for="goalInput">هدف روزانه (ساعت)</label>
+          <input type="number" id="goalInput" min="0" max="24" step="0.5">
+          <span class="hint" style="margin:0">پومودورو کامل‌شده امروز: <b id="doneCount">۰</b></span>
+        </div>
+        <div class="bar"><i id="goalBar" style="width:0%"></i></div>
+        <div class="goaltxt" id="goalTxt"></div>
+      </div>
+    </section>
+
+    <!-- خط زمانی ۲۴ ساعته -->
+    <section class="card full">
+      <h2>خط زمانی ۲۴ ساعته امروز</h2>
+      <p class="sub">هر ردیف یک درس است. وقتی تایمر روی «تمرکز» روشن باشد، بازه همان درس لحظه‌به‌لحظه روی نمودار بزرگ می‌شود. خط رنگی عمودی یعنی همین الان. ثبت‌های دستی ساعت مشخصی ندارند و روی این نمودار نمی‌آیند.</p>
+      <div class="scroll"><svg class="chart" id="tlChart" viewBox="0 0 960 90" role="img" aria-label="خط زمانی ۲۴ ساعته امروز"></svg></div>
+      <div class="testline" id="tlTests"></div>
+    </section>
+
+    <!-- هفته -->
+    <section class="card full">
+      <h2>هفته اخیر</h2>
+      <p class="sub">۷ روز گذشته به تفکیک درس. پنل پایین: تعداد تست هر روز.</p>
+      <div class="donutrow" style="align-items:flex-start;justify-content:space-between">
+        <div style="flex:1.3;min-width:280px"><svg class="chart" id="weekChart" viewBox="0 0 420 290" role="img" aria-label="نمودار هفتگی"></svg></div>
+        <div style="flex:1;min-width:240px">
+          <div class="stats" id="weekStats"></div>
+          <div class="legend" id="weekLegend"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ماهانه -->
+    <section class="card full">
+      <h2>آمار ماهانه</h2>
+      <p class="sub">ساعت مطالعه در هر روز، به تفکیک درس (خط‌چین: هدف روزانه). برای دیدن جزئیات، دست خر را روی هر ستون ببرید.</p>
+      <div class="monthbar">
+        <button id="monthPrev">ماه قبل</button>
+        <select id="monthSel" aria-label="انتخاب ماه"></select>
+        <button id="monthNext">ماه بعد</button>
+      </div>
+      <div class="scroll"><svg class="chart" id="qChart" viewBox="0 0 960 300" role="img" aria-label="نمودار ماهانه"></svg></div>
+      <div class="stats" id="qStats"></div>
+      <div class="legend wide" id="qLegend"></div>
+      <div class="testline" id="qTests"></div>
+    </section>
+  </div>
+
+  <footer>
+    <span>داده‌ها فقط در همین مرورگر ذخیره می‌شوند بپره ریدی.</span>
+    <button id="exportBtn">دانلود نسخه پشتیبان</button>
+    <button id="importBtn">بازگردانی پشتیبان</button>
+    <input type="file" id="importFile" accept=".json,application/json" hidden>
+    <div class="links">
+      <a class="linkbtn heart" href="https://reymit.ir/ll_don_akhm" target="_blank" rel="noopener noreferrer">حمایت از ما ❤️</a>
+      <button class="linkbtn" id="contactBtn">راه‌های ارتباطی</button>
+      <a class="linkbtn" href="https://bioolakh-gif.github.io/exam-plan-TAJROBI/P-N.html" target="_blank" rel="noopener noreferrer">همیار برنامه</a>
+      <button class="linkbtn" id="examBtn">برنامه آزمون‌ها</button>
+    </div>
+  </footer>
+
+  <div class="modal" id="contactModal" hidden>
+    <div class="glass" role="dialog" aria-modal="true" aria-labelledby="contactTitle">
+      <button class="mclose" data-close aria-label="بستن">×</button>
+      <h3 id="contactTitle">راه‌های ارتباطی</h3>
+      <p>برای خبرهای جدید و ارتباط با ما، به کانال تلگرام بپیوندید.</p>
+      <a class="gbtn" href="https://t.me/l_l_akhm" target="_blank" rel="noopener noreferrer">ورود به کانال تلگرام</a>
+      <div class="url" dir="ltr">t.me/l_l_akhm</div>
+    </div>
+  </div>
+
+  <div class="modal" id="examModal" hidden>
+    <div class="glass" role="dialog" aria-modal="true" aria-labelledby="examTitle">
+      <button class="mclose" data-close aria-label="بستن">×</button>
+      <h3 id="examTitle">برنامه آزمون‌ها</h3>
+      <p>رشته خودت را انتخاب کن.</p>
+      <a class="gbtn" href="https://bioolakh-gif.github.io/exam-plan-TAJROBI/A12T-N.html" target="_blank" rel="noopener noreferrer">تجربی</a>
+      <a class="gbtn" href="https://bioolakh-gif.github.io/exam-plan-TAJROBI/A12R-N.html" target="_blank" rel="noopener noreferrer">ریاضی</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- ابزارها ---------- */
+const $ = id => document.getElementById(id);
+const toFa = s => String(s).replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const dkey = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const fmt = sec => {
+  const m = Math.round(sec / 60), h = Math.floor(m / 60), mm = m % 60;
+  if (h && mm) return toFa(h) + ' ساعت و ' + toFa(mm) + ' دقیقه';
+  if (h) return toFa(h) + ' ساعت';
+  return toFa(mm) + ' دقیقه';
+};
+const fmtHM = sec => { const m = Math.round(sec / 60); return toFa(Math.floor(m / 60) + ':' + pad(m % 60)); };
+const faDate = (d, o) => d.toLocaleDateString('fa-IR', o);
+
+/* ---------- داده‌ها ---------- */
+const KEY = 'pomodoro-study-v1';
+const PALETTE = ['#3B6FF5','#E8590C','#12A150','#C2255C','#7048E8','#F59F00','#0CA5B0','#8D6E63','#D6336C','#4C6EF5','#2F9E44','#E03131'];
+
+function defaults() {
+  return {
+    subjects: [
+      { id: 's1', name: 'ریاضی', color: PALETTE[0] },
+      { id: 's2', name: 'فیزیک', color: PALETTE[1] },
+    ],
+    active: 's1', goalMin: 240,
+    dur: { focus: 25, short: 5, long: 15 },
+    days: {},   // { '2026-10-10': { subjectId: seconds } }
+    done: {},   // { '2026-10-10': تعداد پومودورو }
+    manual: [], // ثبت‌های دستی: { id, key, sid, sec, tests }
+    tests: {},  // { '2026-10-10': { subjectId: تعداد تست } }
+    segs: {},   // بازه‌های مطالعه با تایمر: { '2026-10-10': [[subjectId, startMs, endMs], ...] }
+    bg: true    // ادامه در پس‌زمینه
+  };
+}
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (s && Array.isArray(s.subjects)) return Object.assign(defaults(), s);
+  } catch (e) {}
+  return defaults();
+}
+function save() {
+  try {
+    store.run = running ? { mode, remaining, last } : null; // وضعیت تایمر در حال اجرا (برای برگشت از اپ دیگر)
+    pruneSegs();
+    localStorage.setItem(KEY, JSON.stringify(store));
+  } catch (e) {}
+}
+
+let store = load();
+if (!store.tests) store.tests = {};
+if (!store.segs) store.segs = {};
+if (!Array.isArray(store.manual)) store.manual = [];
+function pruneSegs() { // بازه‌های قدیمی‌تر از ۱۲۰ روز لازم نیستند
+  const c = new Date(); c.setDate(c.getDate() - 120);
+  const ck = dkey(c);
+  Object.keys(store.segs || {}).forEach(k => { if (k < ck) delete store.segs[k]; });
+}
+const subj = id => store.subjects.find(s => s.id === id);
+const colorOf = id => (subj(id) || {}).color || '#9AA3B2';
+const nameOf = id => (subj(id) || {}).name || 'درس حذف‌شده';
+const activeSubj = () => { const s = subj(store.active); return s && !s.archived ? s : null; };
+
+function dayItems(key) {
+  const day = store.days[key] || {};
+  const order = store.subjects.map(s => s.id);
+  return Object.keys(day).filter(id => day[id] > 0)
+    .sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99))
+    .map(id => ({ id, sec: day[id] }));
+}
+const sum = items => items.reduce((a, b) => a + b.sec, 0);
+const sumN = items => items.reduce((a, b) => a + b.n, 0);
+const fmtN = n => toFa(n) + ' تست';
+function dayTests(key) {
+  const d = (store.tests && store.tests[key]) || {};
+  const order = store.subjects.map(s => s.id);
+  return Object.keys(d).filter(id => d[id] > 0)
+    .sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99))
+    .map(id => ({ id, n: d[id] }));
+}
+function testLine(items, label) {
+  const tot = sumN(items);
+  if (!tot) return `<span>${label}: هنوز تستی ثبت نشده.</span>`;
+  return `<b>${label}: ${fmtN(tot)}</b>` + items.slice().sort((a, b) => b.n - a.n).map(i =>
+    `<span class="tchip" style="--c:${colorOf(i.id)}"><span class="dot"></span>${esc(nameOf(i.id))}: ${toFa(i.n)}</span>`).join('');
+}
+function lastDays(n) {
+  const out = [], now = new Date();
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    out.push({ date: d, key: dkey(d) });
+  }
+  return out;
+}
+
+/* ---------- تایمر ---------- */
+const MODES = { focus: 'تمرکز', short: 'استراحت کوتاه', long: 'استراحت بلند' };
+const CIRC = 2 * Math.PI * 88;
+let mode = 'focus', remaining = store.dur.focus * 60000, running = false, last = 0, iv = null, lastSave = 0, lastTl = 0;
+const totalMs = () => store.dur[mode] * 60000;
+
+function setMode(m) {
+  pause(true);
+  mode = m;
+  remaining = totalMs();
+  renderTimer();
+}
+function start() {
+  if (running) return;
+  if (mode === 'focus' && !activeSubj()) { alert(' گلابی عزیزاول یک درس انتخاب کن یا درس جدید اضافه کن.'); return; }
+  ensureAudio(); stopAlarm();
+  running = true; last = Date.now(); lockScreen(); startKeepAlive();
+  iv = setInterval(tick, 250);
+  renderTimer();
+}
+function pause(silent) {
+  if (!running) return;
+  running = false; clearInterval(iv); unlockScreen(); stopKeepAlive(); save();
+  if (!silent) renderAll();
+}
+function tick() {
+  const now = Date.now();
+  const late = now - last > 5000; // یعنی صفحه مدتی در پس‌زمینه بوده
+  let d = Math.max(0, Math.min(now - last, remaining));
+  last = now; remaining -= d;
+  if (mode === 'focus') {
+    const s = activeSubj();
+    if (s) addTime(s.id, d / 1000, now);
+  }
+  if (mode === 'focus' && now - lastTl > 1000) { lastTl = now; renderTimeline(); }
+  if (now - lastSave > 5000) { save(); lastSave = now; renderStats(); updateMediaSession(); }
+  if (remaining <= 0) { finish(late); return; }
+  renderTimer();
+}
+function addTime(id, sec, now) {
+  // زمان را به روز واقعی‌اش نسبت می‌دهد (اگر از نیمه‌شب رد شود بین دو روز تقسیم می‌شود) و بازه را برای خط زمانی ثبت می‌کند
+  let startMs = Math.round(now - sec * 1000);
+  if (!store.segs) store.segs = {};
+  while (now - startMs > 0) {
+    const sd = new Date(startMs);
+    const nextMid = new Date(sd.getFullYear(), sd.getMonth(), sd.getDate() + 1).getTime();
+    const e = Math.min(now, nextMid), k = dkey(sd);
+    const day = store.days[k] || (store.days[k] = {});
+    day[id] = (day[id] || 0) + (e - startMs) / 1000;
+    const arr = store.segs[k] || (store.segs[k] = []);
+    const l = arr[arr.length - 1];
+    if (l && l[0] === id && startMs - l[2] <= 3000) l[2] = e; else arr.push([id, startMs, e]);
+    startMs = e;
+  }
+}
+function finish(silent) {
+  running = false; clearInterval(iv); unlockScreen();
+  let next;
+  if (mode === 'focus') {
+    const k = dkey(new Date());
+    store.done[k] = (store.done[k] || 0) + 1;
+    next = store.done[k] % 4 === 0 ? 'long' : 'short';
+  } else next = 'focus';
+  save();
+  mode = next; remaining = totalMs();
+  $('alarmMsg').textContent = next === 'focus' ? 'استراحت تمام شد پاشو که برات ریدن؟' : 'یک پومودورو تمام شد. وقت استراحت شل کن کسکم.';
+  if (silent) {
+    $('alarmMsg').textContent = 'تایمر وقتی بیرون بودی تمام شد. ' + $('alarmMsg').textContent;
+    $('alarm').hidden = false; stopKeepAlive();
+  } else playAlarm();
+  renderAll();
+}
+function resetTimer() { pause(true); remaining = totalMs(); renderAll(); }
+
+function renderTimer() {
+  const sec = Math.ceil(remaining / 1000);
+  const t = toFa(pad(Math.floor(sec / 60)) + ':' + pad(sec % 60));
+  $('time').textContent = t;
+  $('modeLabel').textContent = MODES[mode];
+  $('ring').setAttribute('stroke-dashoffset', (CIRC * (1 - remaining / totalMs())).toFixed(2));
+  const s = activeSubj();
+  $('ring').style.stroke = mode === 'focus' ? (s ? s.color : 'var(--accent)') : 'var(--ok)';
+  $('startBtn').textContent = running ? 'توقف' : 'شروع';
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.m === mode));
+  document.title = running ? t + ' · ' + MODES[mode] : 'تایمر مطالعه';
+}
+
+/* ---------- صدای زنگ ---------- */
+let ctx = null, alarmIv = null, alarmCount = 0;
+function ensureAudio() {
+  try {
+    if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === 'suspended') ctx.resume();
+  } catch (e) {}
+}
+function beep(t, freq, dur) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'square'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.5, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t); o.stop(t + dur + 0.02);
+}
+function ringOnce() {
+  if (!ctx) return;
+  const t = ctx.currentTime + 0.05;
+  [880, 880, 880, 1175].forEach((f, i) => beep(t + i * 0.24, f, 0.17));
+}
+/* ---- زنده ماندن در پس‌زمینه + زنگ با المان صوتی (برای کروم گوشی) ---- */
+const bgAudio = new Audio();
+bgAudio.preload = 'auto';
+let keepUrl = null, alarmUrl = null;
+function wavUrl(samples, rate) {
+  const n = samples.length, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+  const w = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt ');
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, rate, true); v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+  w(36, 'data'); v.setUint32(40, n * 2, true);
+  for (let i = 0; i < n; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, samples[i])) * 32767, true);
+  return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
+}
+function initAudioUrls() {
+  if (!keepUrl) { // ۱۰ ثانیه سینوس ۲۰ هرتز با دامنه بسیار کم (شنیده نمی‌شود ولی صدا حساب می‌شود)
+    const rate = 8000, a = new Float32Array(rate * 10);
+    for (let i = 0; i < a.length; i++) a[i] = 0.003 * Math.sin(2 * Math.PI * 20 * i / rate);
+    keepUrl = wavUrl(a, rate);
+  }
+  if (!alarmUrl) { // ۱۰ بار تکرار الگوی چهار بوق، هر ۱٫۶ ثانیه
+    const rate = 22050, rep = 10, per = 1.6, a = new Float32Array(Math.round(rate * per * rep));
+    for (let r = 0; r < rep; r++) [880, 880, 880, 1175].forEach((f, i) => {
+      const s0 = Math.round((r * per + i * 0.24) * rate), len = Math.round(0.17 * rate);
+      for (let j = 0; j < len; j++) {
+        const t = j / rate, env = Math.max(0, Math.min(1, t / 0.008) * Math.min(1, (0.17 - t) / 0.03));
+        a[s0 + j] = (Math.sin(2 * Math.PI * f * t) >= 0 ? 1 : -1) * 0.7 * env;
+      }
+    });
+    alarmUrl = wavUrl(a, rate);
+  }
+}
+function startKeepAlive() {
+  if (store.bg === false) return;
+  try {
+    initAudioUrls();
+    if (bgAudio.dataset.mode !== 'keep') { bgAudio.src = keepUrl; bgAudio.dataset.mode = 'keep'; bgAudio.loop = true; }
+    bgAudio.volume = 1;
+    const p = bgAudio.play(); if (p && p.catch) p.catch(() => {});
+    updateMediaSession();
+  } catch (e) {}
+}
+function stopKeepAlive() {
+  try { if (bgAudio.dataset.mode === 'keep') { bgAudio.pause(); bgAudio.dataset.mode = ''; } } catch (e) {}
+}
+function updateMediaSession() {
+  if (!('mediaSession' in navigator) || !running) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({ title: $('time').textContent + ' · ' + MODES[mode], artist: 'پومولاین' });
+    navigator.mediaSession.playbackState = 'playing';
+  } catch (e) {}
+}
+try {
+  navigator.mediaSession.setActionHandler('pause', () => { if (running) pause(); });
+  navigator.mediaSession.setActionHandler('play', () => { if (!running) start(); });
+} catch (e) {}
+bgAudio.onended = () => { if (bgAudio.dataset.mode === 'alarm') stopAlarm(); };
+// بعد از بازگردانی تایمر (بدون کلیک) با اولین لمس صدای نگه‌دارنده را دوباره راه بینداز
+document.addEventListener('pointerdown', () => {
+  if (running && store.bg !== false && bgAudio.paused && bgAudio.dataset.mode !== 'alarm') startKeepAlive();
+}, true);
+
+function playAlarmFallback() {
+  ensureAudio(); ringOnce(); alarmCount = 0; clearInterval(alarmIv);
+  alarmIv = setInterval(() => { if (++alarmCount >= 10) { stopAlarm(); return; } ringOnce(); }, 1600);
+}
+function playAlarm() {
+  ensureAudio(); stopAlarm(true);
+  $('alarm').hidden = false;
+  try {
+    initAudioUrls();
+    bgAudio.loop = false; bgAudio.src = alarmUrl; bgAudio.dataset.mode = 'alarm';
+    bgAudio.currentTime = 0; bgAudio.volume = 1;
+    const p = bgAudio.play();
+    if (p && p.catch) p.catch(() => playAlarmFallback());
+  } catch (e) { playAlarmFallback(); }
+}
+function stopAlarm() {
+  clearInterval(alarmIv); alarmIv = null; $('alarm').hidden = true;
+  try { if (bgAudio.dataset.mode === 'alarm') { bgAudio.pause(); bgAudio.dataset.mode = ''; } } catch (e) {}
+}
+
+/* ---------- درس‌ها ---------- */
+function renderSubjects() {
+  const list = store.subjects.filter(s => !s.archived);
+  $('chips').innerHTML = list.length ? list.map(s =>
+    `<div class="chip ${s.id === store.active ? 'on' : ''}" data-id="${s.id}" style="--c:${s.color}" tabindex="0" role="button">
+       <span class="dot"></span>${esc(s.name)}<button class="x" data-del="${s.id}" title="حذف درس" aria-label="حذف ${esc(s.name)}">×</button>
+     </div>`).join('') : '<span class="empty">هنوز درسی نداری.گلابی یه درس اضافه کن.</span>';
+  $('newColor').value = nextColor();
+}
+function nextColor() {
+  const used = store.subjects.filter(s => !s.archived).map(s => s.color);
+  return PALETTE.find(c => !used.includes(c)) || PALETTE[store.subjects.length % PALETTE.length];
+}
+function addSubject() {
+  const name = $('newName').value.trim();
+  if (!name) { $('newName').focus(); return; }
+  if (store.subjects.some(s => !s.archived && s.name === name)) { alert('این درس قبلاً اضافه شده خره.'); return; }
+  const s = { id: 's' + Date.now().toString(36), name, color: $('newColor').value };
+  store.subjects.push(s); store.active = s.id;
+  $('newName').value = '';
+  save(); renderAll();
+}
+function hasData(id) { return Object.values(store.days).some(d => d[id] > 0) || Object.values(store.tests || {}).some(d => d[id] > 0); }
+function removeSubject(id) {
+  const s = subj(id); if (!s) return;
+  const keep = hasData(id);
+  if (!confirm(keep ? `درس «${s.name}» از لیست برداشته می‌شود ولی آمار قبلی‌اش در نمودارها می‌ماند. اوکی؟` : `درس «${s.name}» حذف شود؟`)) return;
+  if (keep) s.archived = true; else store.subjects = store.subjects.filter(x => x.id !== id);
+  if (store.active === id) { const f = store.subjects.find(x => !x.archived); store.active = f ? f.id : null; }
+  save(); renderAll();
+}
+
+/* ---------- نمودارها ---------- */
+function stack(items, x, w, baseY, scale) {
+  let y = baseY, out = '';
+  items.forEach(it => {
+    const h = it.sec * scale; y -= h;
+    out += `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${w.toFixed(2)}" height="${h.toFixed(2)}" fill="${colorOf(it.id)}"/>`;
+  });
+  return out;
+}
+function tip(date, items, tests) {
+  const head = faDate(date, { weekday: 'long', day: 'numeric', month: 'long' });
+  tests = tests || [];
+  const tn = sumN(tests);
+  if (!items.length && !tn) return head + '\nهنوز گوهی نخوردی';
+  let out = head;
+  if (items.length) out += '\n' + items.map(i => nameOf(i.id) + ': ' + fmt(i.sec)).join('\n') + '\nمجموع: ' + fmt(sum(items));
+  if (tn) out += '\nتعداد تست: ' + toFa(tn) + '\n' + tests.map(i => nameOf(i.id) + ': ' + toFa(i.n)).join('\n');
+  return out;
+}
+function legendFor(totals, withPercent, tmap) {
+  tmap = tmap || {};
+  const ids = [...new Set([...Object.keys(totals), ...Object.keys(tmap).filter(id => tmap[id] > 0)])];
+  const all = Object.values(totals).reduce((a, b) => a + b, 0);
+  return ids.sort((a, b) => (totals[b] || 0) - (totals[a] || 0) || (tmap[b] || 0) - (tmap[a] || 0)).map(id => {
+    const t = totals[id] || 0, parts = [];
+    if (t > 0 || !(tmap[id] > 0)) parts.push(fmt(t) + (withPercent && all ? ' · ' + toFa(Math.round(t / all * 100)) + '٪' : ''));
+    if (tmap[id] > 0) parts.push(fmtN(tmap[id]));
+    return `<div style="--c:${colorOf(id)}"><span class="dot"></span>${esc(nameOf(id))}<span class="t">${parts.join(' · ')}</span></div>`;
+  }).join('');
+}
+
+function renderToday() {
+  const k = dkey(new Date()), items = dayItems(k), tot = sum(items);
+  const R = 72, C = 2 * Math.PI * R;
+  let off = 0, segs = '';
+  items.forEach(it => {
+    const len = it.sec / tot * C, gap = items.length > 1 ? Math.min(3, len * 0.3) : 0;
+    segs += `<circle cx="100" cy="100" r="${R}" fill="none" stroke="${colorOf(it.id)}" stroke-width="26" stroke-dasharray="${(len - gap).toFixed(2)} ${(C - len + gap).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 100 100)" data-tip="${esc(nameOf(it.id))}: ${fmt(it.sec)}"></circle>`;
+    off += len;
+  });
+  $('donut').innerHTML =
+    `<circle cx="100" cy="100" r="${R}" fill="none" stroke="var(--track)" stroke-width="26"/>${segs}
+     <text x="100" y="104" text-anchor="middle" font-size="30" font-weight="700" style="fill:var(--ink)">${fmtHM(tot)}</text>
+     <text x="100" y="126" text-anchor="middle" font-size="11">مطالعه امروز</text>`;
+  const totals = {}; items.forEach(i => totals[i.id] = i.sec);
+  $('todayLegend').innerHTML = tot ? legendFor(totals, true) : '<span class="empty">امروز هنوزگوهی نخوردی سکینه شروع کن.</span>';
+  $('todayTests').innerHTML = testLine(dayTests(k), 'تعداد تست امروز');
+
+  const goal = store.goalMin * 60;
+  if (document.activeElement !== $('goalInput')) $('goalInput').value = store.goalMin / 60;
+  $('doneCount').textContent = toFa(store.done[k] || 0);
+  const pct = goal ? Math.min(100, tot / goal * 100) : 0;
+  $('goalBar').style.width = pct + '%';
+  $('goalBar').classList.toggle('done', goal > 0 && tot >= goal);
+  $('goalTxt').textContent = !goal ? 'هدفی تعیین نشده.' :
+    tot >= goal ? `امروز نریدی و هدف رو زدی (${fmt(tot)} از ${fmt(goal)}).` :
+    `${fmt(tot)} از ${fmt(goal)} · ${toFa(Math.round(pct))}٪ · ${fmt(goal - tot)} مانده`;
+}
+
+function renderWeek() {
+  const days = lastDays(7).map(d => ({ ...d, items: dayItems(d.key), tests: dayTests(d.key) }));
+  const goal = store.goalMin * 60;
+  const W = 420, H1 = 190, H = 290, padX = 8, padT = 22, padB = 28;
+  const maxSec = Math.max(1800, goal, ...days.map(d => sum(d.items))) * 1.08;
+  const scale = (H1 - padT - padB) / maxSec, base = H1 - padB;
+  const slot = (W - padX * 2) / 7, bw = slot * 0.58;
+  let svg = `<line x1="${padX}" x2="${W - padX}" y1="${base}" y2="${base}" stroke="var(--line)"/>`;
+  if (goal) {
+    const gy = base - goal * scale;
+    svg += `<line x1="${padX}" x2="${W - padX}" y1="${gy}" y2="${gy}" stroke="var(--mute)" stroke-dasharray="4 4" opacity=".7"/>`;
+  }
+  // پنل تعداد تست
+  const maxT = Math.max(5, ...days.map(d => sumN(d.tests)));
+  const base2 = 270, scale2 = 44 / maxT;
+  svg += `<line x1="${padX}" x2="${W - padX}" y1="198" y2="198" stroke="var(--line)" stroke-dasharray="2 4"/><text x="${padX}" y="212" font-size="11">تعداد تست</text><line x1="${padX}" x2="${W - padX}" y1="${base2}" y2="${base2}" stroke="var(--line)"/>`;
+  days.forEach((d, i) => {
+    const x = padX + slot * i + (slot - bw) / 2, tot = sum(d.items), cx = x + bw / 2, tn = sumN(d.tests);
+    svg += stack(d.items, x, bw, base, scale);
+    if (tot > 0) svg += `<text x="${cx}" y="${base - tot * scale - 5}" text-anchor="middle" font-size="11">${fmtHM(tot)}</text>`;
+    svg += `<text x="${cx}" y="${H1 - 9}" text-anchor="middle" font-size="12" ${i === 6 ? 'font-weight="700" style="fill:var(--ink)"' : ''}>${faDate(d.date, { weekday: 'short' })}</text>`;
+    svg += stack(d.tests.map(t => ({ id: t.id, sec: t.n })), x, bw, base2, scale2);
+    if (tn > 0) svg += `<text x="${cx}" y="${base2 - tn * scale2 - 4}" text-anchor="middle" font-size="11">${toFa(tn)}</text>`;
+    svg += `<text x="${cx}" y="285" text-anchor="middle" font-size="10" opacity=".8">${faDate(d.date, { weekday: 'short' })}</text>`;
+    svg += `<rect x="${padX + slot * i}" y="0" width="${slot}" height="${H}" fill="transparent" data-tip="${esc(tip(d.date, d.items, d.tests))}"></rect>`;
+  });
+  $('weekChart').innerHTML = svg;
+
+  const totals = {}, tmap = {}; let all = 0, met = 0, tAll = 0;
+  days.forEach(d => {
+    const t = sum(d.items); all += t; if (goal && t >= goal) met++;
+    d.items.forEach(i => totals[i.id] = (totals[i.id] || 0) + i.sec);
+    d.tests.forEach(i => { tmap[i.id] = (tmap[i.id] || 0) + i.n; tAll += i.n; });
+  });
+  $('weekStats').innerHTML =
+    `<div class="stat"><b>${fmt(all)}</b><span>مجموع هفته</span></div>
+     <div class="stat"><b>${fmt(all / 7)}</b><span>میانگین روزانه</span></div>
+     <div class="stat"><b>${toFa(met)} از ${toFa(7)}</b><span>روزهای رسیده به هدف</span></div>
+     <div class="stat"><b>${toFa(tAll)}</b><span>مجموع تست هفته</span></div>`;
+  $('weekLegend').innerHTML = (all || tAll) ? legendFor(totals, true, tmap) : '<span class="empty">در ۷ روز گذشته مطالعه‌ای ثبت نشده.</span>';
+}
+
+/* ---- خط زمانی ۲۴ ساعته ---- */
+const fmtClock = ms => { const d = new Date(ms); return toFa(pad(d.getHours()) + ':' + pad(d.getMinutes())); };
+const shortName = t => t.length > 12 ? t.slice(0, 11) + '…' : t;
+function renderTimeline() {
+  const el = $('tlChart'); if (!el) return;
+  const now = new Date(), nowMs = now.getTime();
+  const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const span = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() - dayStart;
+  const key = dkey(now), segs = (store.segs && store.segs[key]) || [];
+  const order = store.subjects.map(s => s.id);
+  const ids = [...new Set(segs.map(x => x[0]))].sort((a, b) => (order.indexOf(a) + 1 || 99) - (order.indexOf(b) + 1 || 99));
+  const rows = Math.max(1, ids.length);
+  const W = 960, padL = 120, padR = 12, padT = 24, rowH = 30, H = padT + rows * rowH + 14;
+  const pw = W - padL - padR, X = ms => padL + pw * (ms - dayStart) / span;
+  let svg = '';
+  for (let r = 0; r < rows; r += 2) svg += `<rect x="${padL}" y="${padT + r * rowH}" width="${pw}" height="${rowH}" fill="var(--track)" opacity=".35"/>`;
+  for (let h = 0; h <= 24; h++) {
+    const x = padL + pw * h / 24;
+    svg += `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${padT - 4}" y2="${H - 10}" stroke="var(--line)"/><text x="${x.toFixed(1)}" y="14" text-anchor="middle" font-size="11">${toFa(h)}</text>`;
+  }
+  if (!ids.length) svg += `<text x="${padL + pw / 2}" y="${padT + 19}" text-anchor="middle" font-size="13">هنوز بازه‌ای امروز ثبت نشده. تایمر را روی «تمرکز» شروع کن.</text>`;
+  ids.forEach((id, r) => {
+    const y = padT + r * rowH + 6;
+    svg += `<circle cx="${padL - 10}" cy="${y + 9}" r="5" fill="${colorOf(id)}"/><text x="${padL - 22}" y="${y + 14}" text-anchor="end" font-size="13" style="fill:var(--ink)">${esc(shortName(nameOf(id)))}</text>`;
+    segs.filter(x => x[0] === id).forEach(sg => {
+      const x = X(sg[1]), w = Math.max(2.5, X(sg[2]) - x), dur = (sg[2] - sg[1]) / 1000;
+      const t = nameOf(id) + '\n' + fmtClock(sg[1]) + ' تا ' + fmtClock(sg[2]) + '\n' + (dur < 60 ? 'کمتر از ۱ دقیقه' : fmt(dur));
+      svg += `<rect x="${x.toFixed(1)}" y="${y}" width="${w.toFixed(1)}" height="18" rx="4" fill="${colorOf(id)}" data-tip="${esc(t)}"/>`;
+    });
+  });
+  const nx = X(nowMs);
+  svg += `<line x1="${nx.toFixed(1)}" x2="${nx.toFixed(1)}" y1="${padT - 6}" y2="${H - 8}" stroke="var(--accent)" stroke-width="2"/><circle cx="${nx.toFixed(1)}" cy="${padT - 6}" r="3.5" fill="var(--accent)"/>`;
+  el.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  el.innerHTML = svg;
+  $('tlTests').innerHTML = testLine(dayTests(key), 'تعداد تست امروز');
+}
+
+/* ---- ماه شمسی ---- */
+const FA_MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const jf = new Intl.DateTimeFormat('fa-IR-u-ca-persian-nu-latn', { year: 'numeric', month: 'numeric', day: 'numeric' });
+function jparts(d) {
+  const o = {};
+  jf.formatToParts(d).forEach(p => { if (/^\d+$/.test(p.value)) o[p.type] = +p.value; });
+  return o;
+}
+function monthOf(d) {
+  const p = jparts(d);
+  return { jy: p.year, jm: p.month, first: new Date(d.getFullYear(), d.getMonth(), d.getDate() - (p.day - 1)) };
+}
+function monthLen(first) {
+  const m = jparts(first).month;
+  for (let n = 29; n < 32; n++) {
+    if (jparts(new Date(first.getFullYear(), first.getMonth(), first.getDate() + n)).month !== m) return n;
+  }
+  return 31;
+}
+function buildMonths() {
+  const keys = Object.keys(store.days).filter(k => Object.keys(store.days[k]).length).sort();
+  const earliest = keys.length ? new Date(+keys[0].slice(0, 4), +keys[0].slice(5, 7) - 1, +keys[0].slice(8, 10)) : null;
+  const list = []; let m = monthOf(new Date());
+  for (let i = 0; i < 60; i++) {
+    list.push({ ...m, len: monthLen(m.first), id: m.jy + '-' + m.jm });
+    if (i >= 12 && (!earliest || m.first <= earliest)) break; // حداقل یک سال (۱۳ ماه: ماه جاری + ۱۲ ماه قبل)
+    m = monthOf(new Date(m.first.getFullYear(), m.first.getMonth(), m.first.getDate() - 1));
+  }
+  return list; // جدیدترین ماه اول
+}
+let selMonth = null;
+
+function renderQuarter() {
+  const months = buildMonths();
+  let idx = months.findIndex(m => m.id === selMonth);
+  if (idx < 0) idx = 0;
+  selMonth = months[idx].id;
+  const mo = months[idx];
+
+  const opts = months.map((m, i) => `<option value="${m.id}">${FA_MONTHS[m.jm - 1]} ${toFa(m.jy)}</option>`).join('');
+  if ($('monthSel').innerHTML !== opts) $('monthSel').innerHTML = opts;
+  $('monthSel').value = selMonth;
+  $('monthPrev').disabled = idx >= months.length - 1;
+  $('monthNext').disabled = idx <= 0;
+
+  const todayKey = dkey(new Date());
+  const days = [];
+  for (let i = 0; i < mo.len; i++) {
+    const date = new Date(mo.first.getFullYear(), mo.first.getMonth(), mo.first.getDate() + i);
+    const key = dkey(date);
+    days.push({ date, key, num: i + 1, items: dayItems(key), tests: dayTests(key), future: key > todayKey });
+  }
+  const goal = store.goalMin * 60;
+  const W = 960, H = 300, pl = 40, pr = 8, pt = 14, pb = 30;
+  const pw = W - pl - pr, ph = H - pt - pb, slot = pw / mo.len, bw = Math.min(slot * 0.66, 26);
+  const maxSec = Math.max(3600, goal, ...days.map(d => sum(d.items)));
+  const maxH = Math.ceil(maxSec / 3600);
+  const step = maxH <= 4 ? 1 : maxH <= 8 ? 2 : maxH <= 12 ? 3 : 4;
+  const top = Math.ceil(maxH / step) * step;
+  const scale = ph / (top * 3600), base = pt + ph;
+  let svg = '';
+  for (let h = 0; h <= top; h += step) {
+    const y = base - h * 3600 * scale;
+    svg += `<line x1="${pl}" x2="${W - pr}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${pl - 8}" y="${y + 4}" text-anchor="end" font-size="13">${toFa(h)}</text>`;
+  }
+  days.forEach((d, i) => {
+    const x = pl + slot * i + (slot - bw) / 2, cx = pl + slot * i + slot / 2;
+    svg += stack(d.items, x, bw, base, scale);
+    const isToday = d.key === todayKey;
+    svg += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="12" ${isToday ? 'font-weight="700" style="fill:var(--ink)"' : d.future ? 'opacity=".45"' : ''}>${toFa(d.num)}</text>`;
+  });
+  if (goal) {
+    const gy = base - goal * scale;
+    svg += `<line x1="${pl}" x2="${W - pr}" y1="${gy}" y2="${gy}" stroke="var(--ink)" stroke-dasharray="6 5" opacity=".55"/>`;
+  }
+  days.forEach((d, i) => {
+    svg += `<rect x="${pl + slot * i}" y="${pt}" width="${slot}" height="${ph}" fill="transparent" data-tip="${esc(tip(d.date, d.items, d.tests))}"></rect>`;
+  });
+  $('qChart').innerHTML = svg;
+
+  const totals = {}, tmap = {}; let all = 0, studied = 0, met = 0, best = null, elapsed = 0, tAll = 0;
+  days.forEach(d => {
+    if (!d.future) elapsed++;
+    const t = sum(d.items); all += t;
+    if (t > 0) studied++;
+    if (goal && t >= goal) met++;
+    if (!best || t > best.t) best = { t, num: d.num };
+    d.items.forEach(i => totals[i.id] = (totals[i.id] || 0) + i.sec);
+    d.tests.forEach(i => { tmap[i.id] = (tmap[i.id] || 0) + i.n; tAll += i.n; });
+  });
+  $('qStats').innerHTML =
+    `<div class="stat"><b>${fmt(all)}</b><span>مجموع ${FA_MONTHS[mo.jm - 1]}</span></div>
+     <div class="stat"><b>${fmt(all / Math.max(1, elapsed))}</b><span>میانگین روزانه</span></div>
+     <div class="stat"><b>${toFa(studied)} از ${toFa(mo.len)}</b><span>روزهای مطالعه‌شده</span></div>
+     <div class="stat"><b>${goal ? toFa(met) + ' روز' : '—'}</b><span>روزهای رسیده به هدف</span></div>
+     <div class="stat"><b>${best && best.t ? fmt(best.t) : '—'}</b><span>بهترین روز${best && best.t ? ' (' + toFa(best.num) + ' ' + FA_MONTHS[mo.jm - 1] + ')' : ''}</span></div>`;
+  $('qStats').insertAdjacentHTML('beforeend', `<div class="stat"><b>${toFa(tAll)}</b><span>تعداد کل تست</span></div>`);
+  $('qLegend').innerHTML = all ? legendFor(totals, false) : '<span class="empty">در این ماه گوهی خورده نشده است.</span>';
+  $('qTests').innerHTML = testLine(Object.keys(tmap).map(id => ({ id, n: tmap[id] })), 'تعداد تست ' + FA_MONTHS[mo.jm - 1]);
+}
+
+function renderStats() { renderToday(); renderTimeline(); renderWeek(); renderQuarter(); }
+function renderAll() {
+  $('today').textContent = faDate(new Date(), { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  renderTimer(); renderSubjects(); renderStats(); renderManual();
+}
+
+/* ---------- رویدادها ---------- */
+$('startBtn').onclick = () => running ? pause() : start();
+$('resetBtn').onclick = resetTimer;
+$('stopAlarm').onclick = stopAlarm;
+$('tabs').onclick = e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.m); };
+$('addBtn').onclick = addSubject;
+$('monthSel').onchange = () => { selMonth = $('monthSel').value; renderQuarter(); };
+$('monthPrev').onclick = () => { const l = buildMonths(), i = l.findIndex(m => m.id === selMonth); if (i < l.length - 1) { selMonth = l[i + 1].id; renderQuarter(); } };
+$('monthNext').onclick = () => { const l = buildMonths(), i = l.findIndex(m => m.id === selMonth); if (i > 0) { selMonth = l[i - 1].id; renderQuarter(); } };
+
+/* حالت روز / شب */
+function applyThemeLabel() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  $('themeBtn').textContent = dark ? 'حالت روز' : 'حالت شب';
+}
+$('themeBtn').onclick = () => {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  try { localStorage.setItem('pomodoro-theme', next); } catch (e) {}
+  applyThemeLabel();
+};
+applyThemeLabel();
+$('newName').onkeydown = e => { if (e.key === 'Enter') addSubject(); };
+$('chips').onclick = e => {
+  const del = e.target.closest('[data-del]');
+  if (del) { e.stopPropagation(); removeSubject(del.dataset.del); return; }
+  const chip = e.target.closest('.chip');
+  if (chip) { store.active = chip.dataset.id; save(); renderSubjects(); renderTimer(); }
+};
+$('chips').onkeydown = e => {
+  const chip = e.target.closest('.chip');
+  if (chip && e.target === chip && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); chip.click(); }
+};
+$('goalInput').onchange = () => {
+  const v = parseFloat($('goalInput').value);
+  store.goalMin = isFinite(v) && v >= 0 ? Math.round(Math.min(v, 24) * 60) : 0;
+  save(); renderStats();
+};
+[['dFocus', 'focus'], ['dShort', 'short'], ['dLong', 'long']].forEach(([id, m]) => {
+  $(id).value = store.dur[m];
+  $(id).onchange = () => {
+    const v = Math.round(parseFloat($(id).value));
+    if (isFinite(v) && v >= 1 && v <= 180) store.dur[m] = v;
+    $(id).value = store.dur[m];
+    save();
+    if (!running && mode === m) { remaining = totalMs(); renderTimer(); }
+  };
+});
+
+/* ثبت دستی ساعات مطالعه */
+function renderManual() {
+  if (!Array.isArray(store.manual)) store.manual = [];
+  const days = lastDays(60).reverse(); // امروز اول
+  const dOpts = days.map((d, i) => `<option value="${d.key}">${i === 0 ? 'امروز' : i === 1 ? 'دیروز' : faDate(d.date, { weekday: 'long', day: 'numeric', month: 'long' })}</option>`).join('');
+  const dSel = $('mDay');
+  if (dSel.dataset.sig !== dOpts) {
+    const prev = dSel.value;
+    dSel.innerHTML = dOpts; dSel.dataset.sig = dOpts;
+    if (prev && days.some(d => d.key === prev)) dSel.value = prev;
+  }
+  const list = store.subjects.filter(s => !s.archived);
+  const sOpts = list.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('');
+  const sSel = $('mSubj');
+  if (sSel.dataset.sig !== sOpts) {
+    const prev = sSel.value;
+    sSel.innerHTML = sOpts; sSel.dataset.sig = sOpts;
+    sSel.value = list.some(s => s.id === prev) ? prev : (store.active || '');
+  }
+  $('mList').innerHTML = store.manual.slice(-10).reverse().map(e =>
+    `<div class="mrow" style="--c:${colorOf(e.sid)}"><span class="dot"></span>${esc(nameOf(e.sid))} · ${faDate(new Date(+e.key.slice(0, 4), +e.key.slice(5, 7) - 1, +e.key.slice(8, 10)), { day: 'numeric', month: 'short' })}<span class="t">${[e.sec > 0 ? fmt(e.sec) : '', e.tests > 0 ? fmtN(e.tests) : ''].filter(Boolean).join(' · ')}</span><button data-mdel="${e.id}" title="حذف این ثبت" aria-label="حذف این ثبت">×</button></div>`).join('');
+}
+function commitEntry(key, sid, sec, n) { // '' یعنی موفق، در غیر این صورت متن خطا
+  const day = store.days[key] || {};
+  if (sec > 0 && sum(Object.keys(day).map(id => ({ sec: day[id] }))) + sec > 86400) return 'جمع مطالعه یک روز نمی‌تواند از ۲۴ ساعت بیشتر شود.';
+  if (sec > 0) { day[sid] = (day[sid] || 0) + sec; store.days[key] = day; }
+  if (n > 0) { const t = store.tests[key] || (store.tests[key] = {}); t[sid] = (t[sid] || 0) + n; }
+  store.manual.push({ id: 'm' + Date.now().toString(36) + Math.floor(Math.random() * 1000), key, sid, sec, tests: n });
+  save();
+  return '';
+}
+function addManual() {
+  const msg = $('mMsg');
+  const h = Math.floor(+$('mH').value || 0), m = Math.floor(+$('mM').value || 0), n = Math.floor(+$('mT').value || 0);
+  const sec = (h * 60 + m) * 60, key = $('mDay').value, sid = $('mSubj').value;
+  if (!sid || !subj(sid)) { msg.textContent = 'اول یک درس انتخاب کن یا درس جدید اضافه کن.'; return; }
+  if (h < 0 || m < 0 || m > 59 || h > 24 || n < 0 || n > 5000) { msg.textContent = 'مقدار واردشده درست نیست (دقیقه بین ۰ تا ۵۹، تعداد تست حداکثر ۵۰۰۰).'; return; }
+  if (sec <= 0 && n <= 0) { msg.textContent = 'مدت زمان یا تعداد تست را وارد کن.'; return; }
+  const err = commitEntry(key, sid, sec, n);
+  if (err) { msg.textContent = err; return; }
+  msg.textContent = 'ثبت شد: ' + [sec > 0 ? fmt(sec) : '', n > 0 ? fmtN(n) : ''].filter(Boolean).join(' و ') + ' برای «' + nameOf(sid) + '».';
+  $('mH').value = 0; $('mM').value = 0; $('mT').value = 0;
+  renderStats(); renderManual();
+}
+function delManual(id) {
+  const i = store.manual.findIndex(x => x.id === id);
+  if (i < 0 || !confirm('این ثبت دستی حذف شود؟')) return;
+  const e = store.manual[i], day = store.days[e.key];
+  if (day && e.sec > 0) { day[e.sid] = Math.max(0, (day[e.sid] || 0) - e.sec); if (day[e.sid] <= 0) delete day[e.sid]; }
+  const t = store.tests[e.key];
+  if (t && e.tests > 0) { t[e.sid] = Math.max(0, (t[e.sid] || 0) - e.tests); if (t[e.sid] <= 0) delete t[e.sid]; }
+  store.manual.splice(i, 1);
+  save(); $('mMsg').textContent = ''; renderStats(); renderManual();
+}
+$('qtAdd').onclick = () => {
+  const n = Math.floor(+$('qtN').value || 0), s = activeSubj(), msg = $('qtMsg');
+  if (!s) { msg.textContent = 'اول یک درس انتخاب کن یا درس جدید اضافه کن.'; return; }
+  if (n < 1 || n > 5000) { msg.textContent = 'تعداد تست را درست وارد کن.'; return; }
+  commitEntry(dkey(new Date()), s.id, 0, n);
+  $('qtN').value = '';
+  msg.textContent = 'ثبت شد: ' + fmtN(n) + ' برای «' + s.name + '».';
+  renderStats(); renderManual();
+};
+$('mAdd').onclick = addManual;
+$('mList').onclick = e => { const b = e.target.closest('[data-mdel]'); if (b) delManual(b.dataset.mdel); };
+
+/* پشتیبان‌گیری */
+$('exportBtn').onclick = () => {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(store)], { type: 'application/json' }));
+  a.download = 'pomodoro-backup-' + dkey(new Date()) + '.json';
+  a.click(); URL.revokeObjectURL(a.href);
+};
+$('importBtn').onclick = () => $('importFile').click();
+$('importFile').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const o = JSON.parse(r.result);
+      if (!Array.isArray(o.subjects) || typeof o.days !== 'object') throw 0;
+      if (!confirm('اطلاعات فعلی با این فایل پشتیبان جایگزین می‌شود. اوکی؟')) return;
+      pause(true); store = Object.assign(defaults(), o); save();
+      remaining = totalMs(); renderAll();
+    } catch (err) { alert('این فایل پشتیبان معتبر نیست.'); }
+  };
+  r.readAsText(f); e.target.value = '';
+};
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) save();
+  else if (running) { lockScreen(); tick(); } // برگشتن به صفحه: فوراً زمان را به‌روز کن
+});
+
+/* روشن نگه داشتن صفحه هنگام اجرای تایمر (اگر مرورگر پشتیبانی کند) */
+let wl = null;
+async function lockScreen() {
+  try {
+    if ('wakeLock' in navigator && !wl) {
+      wl = await navigator.wakeLock.request('screen');
+      wl.addEventListener('release', () => { wl = null; });
+    }
+  } catch (e) {}
+}
+function unlockScreen() { try { if (wl) wl.release(); } catch (e) {} wl = null; }
+
+/* اگر صفحه بسته یا از حافظه پاک شده بود، تایمر را از همان جا ادامه بده */
+(function restoreRun() {
+  const r = store.run; store.run = null;
+  if (!r || !MODES[r.mode] || !isFinite(+r.remaining) || !isFinite(+r.last)) return;
+  mode = r.mode; remaining = Math.max(0, +r.remaining);
+  const now = Date.now(), gap = Math.max(0, Math.min(now - r.last, remaining));
+  remaining -= gap;
+  if (mode === 'focus' && activeSubj() && gap > 0) addTime(store.active, gap / 1000, now);
+  if (remaining <= 0) { finish(true); return; }
+  running = true; last = now; iv = setInterval(tick, 250); lockScreen();
+})();
+window.addEventListener('beforeunload', save);
+
+/* ---- نمایش جزئیات با موس یا کلیک/لمس روی نمودارها ---- */
+const tt = $('tt');
+function showTip(el, x, y) {
+  tt.textContent = el.getAttribute('data-tip'); tt.hidden = false;
+  const r = tt.getBoundingClientRect();
+  let left = x + 12, top = y + 14;
+  if (left + r.width > innerWidth - 8) left = innerWidth - r.width - 8;
+  if (left < 8) left = 8;
+  if (top + r.height > innerHeight - 8) top = y - r.height - 12;
+  tt.style.left = left + 'px'; tt.style.top = Math.max(8, top) + 'px';
+}
+document.addEventListener('pointermove', e => {
+  if (e.pointerType !== 'mouse') return;
+  const el = e.target.closest && e.target.closest('[data-tip]');
+  if (el) showTip(el, e.clientX, e.clientY); else tt.hidden = true;
+});
+document.addEventListener('click', e => {
+  const el = e.target.closest && e.target.closest('[data-tip]');
+  if (el) showTip(el, e.clientX, e.clientY); else tt.hidden = true;
+});
+window.addEventListener('scroll', () => { tt.hidden = true; }, { passive: true, capture: true });
+
+/* ---- پنجره‌های شیشه‌ای ---- */
+function openModal(id) { const m = $(id); m.hidden = false; const f = m.querySelector('.gbtn'); if (f) f.focus(); }
+document.querySelectorAll('.modal').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-close]')) m.hidden = true; });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal').forEach(m => { m.hidden = true; });
+});
+$('contactBtn').onclick = () => openModal('contactModal');
+$('examBtn').onclick = () => openModal('examModal');
+
+/* ---- گزینه ادامه در پس‌زمینه ---- */
+$('bgOpt').checked = store.bg !== false;
+$('bgOpt').onchange = () => {
+  store.bg = $('bgOpt').checked; save();
+  if (!store.bg) stopKeepAlive(); else if (running) startKeepAlive();
+};
+setInterval(() => { if (!running) renderAll(); }, 60000); // عوض شدن تاریخ بعد از نیمه‌شب
+
+renderAll();
+</script>
+<script>(function(){var sp=document.getElementById("splash");if(!sp)return;sp.onclick=function(){sp.remove()};setTimeout(function(){sp.remove()},3700)})();</script>
+</body>
+</html>
